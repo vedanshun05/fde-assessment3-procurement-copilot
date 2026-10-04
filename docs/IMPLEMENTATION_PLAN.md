@@ -62,7 +62,7 @@ Record the provider, model, mode, case count, attempts, and measurement conditio
 - [x] `.env.example` and no committed secrets
 - [x] Tests of policy boundaries, grounding, and failure behavior
 - [x] Clean-clone verification
-- [ ] Public GitHub repository URL
+- [x] Public GitHub repository URL: https://github.com/vedanshun05/fde-assessment3-procurement-copilot
 - [ ] Submit repository URL through the assessment Google Form
 
 ## Scope and decisions

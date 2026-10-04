@@ -13,7 +13,7 @@
 - [x] README, pinned dependencies and `.env.example`
 - [x] Clean checkout startup verified
 - [x] Tracked-file secret scan passed
-- [ ] Public GitHub repository published
+- [x] Public GitHub repository published: https://github.com/vedanshun05/fde-assessment3-procurement-copilot
 - [ ] Submit public repository URL through the Google Form by 8 October 2026
 
 Live AI is implemented, but live model quality remains unmeasured by the user's choice to continue offline. Offline scores are explicitly labelled. Before claiming a validated AI pilot, configure a local model key and run the same live comparison; inspect rationales and source entailment.
