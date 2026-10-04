@@ -11,7 +11,7 @@
 - [x] Workflow/architecture diagrams, assumptions, known limitations
 - [x] Decision memo below 500 words
 - [x] README, pinned dependencies and `.env.example`
-- [ ] Clean checkout startup verified
+- [x] Clean checkout startup verified
 - [x] Tracked-file secret scan passed
 - [ ] Public GitHub repository published
 - [ ] Submit public repository URL through the Google Form by 8 October 2026

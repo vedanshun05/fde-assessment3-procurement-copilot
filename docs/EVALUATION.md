@@ -45,6 +45,7 @@ Human-handoff checks require `human_review_required`, pending review status, rev
 - Fake model-client tests exercise real orchestration code while reporting no actual model-quality result.
 - **Eight isolated headless browser checks passed** across intake, A/B, handoff export, missing-information/injection display, outage display, HTML-looking input, responsive layouts, and JavaScript errors. See `docs/screenshots/ui-verification.json`.
 - The dependency stack emits one Starlette warning recommending `httpx2` for its future test-client path. Current tests pass; this warning is not an application error.
+- A fresh local clone with its own virtual environment passed pinned installation, the one-command launcher, staged HTTP request analysis, and the full backend verification. See `docs/CLEAN_CHECKOUT_VERIFICATION.json`.
 - Final visual review corrected the distinction between an empty registry date and a null API date: both mean missing, so they should require Security without a false source-conflict flag. A regression test and forbidden flags in new-vendor cases verify this behavior.
 
 ## Limits and next live experiment

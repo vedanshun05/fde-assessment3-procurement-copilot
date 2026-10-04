@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "checked_at": "2026-10-04T14:41:52Z",
+  "fresh_virtual_environment": true,
+  "one_command_start": "./start.sh --port <free_port> --vendor-port <free_port>",
+  "checks": [
+    "pinned dependency installation",
+    "both services ready",
+    "staged request analysis",
+    "no .env in clone",
+    "full backend verification"
+  ],
+  "verified_source_commit": "7b1ea39"
+}

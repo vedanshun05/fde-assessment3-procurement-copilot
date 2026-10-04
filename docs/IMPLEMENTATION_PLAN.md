@@ -61,7 +61,7 @@ Record the provider, model, mode, case count, attempts, and measurement conditio
 - [x] README with setup, workflow, agents/tools, results, decision, and limitations
 - [x] `.env.example` and no committed secrets
 - [x] Tests of policy boundaries, grounding, and failure behavior
-- [ ] Clean-clone verification
+- [x] Clean-clone verification
 - [ ] Public GitHub repository URL
 - [ ] Submit repository URL through the assessment Google Form
 
