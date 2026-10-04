@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+.pytest_cache/
+evals/results_*.csv
+evals/results/live/
+*.log
+.coverage
+artifacts/*.zip
+node_modules/

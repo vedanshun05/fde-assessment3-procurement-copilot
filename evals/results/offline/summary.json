@@ -1,0 +1,45 @@
+{
+  "mode": "offline",
+  "provider": "none",
+  "model": null,
+  "measured_at": "2026-10-04T14:36:38.716433+00:00",
+  "python": "3.14.7",
+  "repeat": 3,
+  "case_set_sha256": "a193a46760f205fbcdc385cd7dbae01940c2c2c46c3db322e6716a3fb114e00d",
+  "conditions": "Local HTTP mock; paired alternating architecture order; date/conflict cases override fetched responses and copied registry records; timeout is controlled.",
+  "limitations": "Offline simulation does not measure LLM reasoning, prompt-injection robustness of a live model, or production latency. Grounding is exact ledger provenance, not an independent semantic entailment judgment.",
+  "architectures": {
+    "single": {
+      "runs": 96,
+      "cases": 32,
+      "passed": 96,
+      "recommendation_correct_rate": 1.0,
+      "policy_correct_rate": 1.0,
+      "grounded_rate": 1.0,
+      "human_handoff_correct_rate": 1.0,
+      "model_completed_rate": null,
+      "mean_latency_ms": 1.894,
+      "median_latency_ms": 1.743,
+      "mean_llm_calls": 0,
+      "mean_tool_calls": 5,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    "staged": {
+      "runs": 96,
+      "cases": 32,
+      "passed": 96,
+      "recommendation_correct_rate": 1.0,
+      "policy_correct_rate": 1.0,
+      "grounded_rate": 1.0,
+      "human_handoff_correct_rate": 1.0,
+      "model_completed_rate": null,
+      "mean_latency_ms": 1.849,
+      "median_latency_ms": 1.695,
+      "mean_llm_calls": 0,
+      "mean_tool_calls": 5,
+      "input_tokens": 0,
+      "output_tokens": 0
+    }
+  }
+}

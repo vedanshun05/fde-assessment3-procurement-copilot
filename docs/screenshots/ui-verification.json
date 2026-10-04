@@ -1,0 +1,14 @@
+{
+  "checked_at": "2026-10-04T14:36:33.026Z",
+  "checks": [
+    "workspace loads ten sample requests in offline mode",
+    "existing catalog option produces a grounded license-fit handoff",
+    "downloaded handoff contains the analyzed request and pending human reviews",
+    "staged incomplete/injected request asks for information and keeps zero LLM calls",
+    "real vendor HTTP outage is visible in the UI",
+    "custom request analyzes successfully and HTML-looking input remains inert",
+    "desktop and mobile layouts render without horizontal page overflow",
+    "no uncaught browser JavaScript errors"
+  ],
+  "passed": true
+}

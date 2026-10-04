@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Procure — Request Copilot</title>
+  <link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script>
+</head>
+<body>
+<aside class="sidebar">
+  <a class="brand" href="/"><span class="brand-icon">p</span>procure<span class="brand-dot">.</span></a>
+  <div class="workspace-label">PROCUREMENT WORKSPACE</div>
+  <div class="sidebar-section"><span class="nav-icon">▤</span> Request workbench <span class="count" id="request-count">10</span></div>
+  <div class="sidebar-heading">SAMPLE REQUESTS</div>
+  <div id="request-list" class="request-list" aria-label="Sample requests"></div>
+  <button id="new-request" class="new-request" type="button">+ New request</button>
+  <div class="sidebar-footer"><span class="status-dot"></span> Synthetic assessment workspace<br><span class="snapshot">Policy 2026.09 · Snapshot 30 Sep 2026</span></div>
+</aside>
+<main>
+  <header class="topbar"><span>Workspace <span class="slash">/</span> Request workbench</span><span class="user-avatar" aria-label="Procurement team">PR</span></header>
+  <div class="content">
+    <div class="page-heading"><div><div class="eyebrow">SOFTWARE & SERVICES</div><h1>Every request. Clear next steps.</h1><p>Gather the evidence, check the policy, and prepare a human review.</p></div><span class="advisory-badge">Human approval required</span></div>
+    <div class="mode-banner" id="mode-banner"><span class="banner-icon">i</span><span><strong>Offline demo</strong> · Analysis uses a deterministic simulation. Live AI is available when configured.</span></div>
+    <div class="workflow" aria-label="Review workflow"><span class="workflow-step active"><b>1</b> Request details</span><span class="workflow-line"></span><span class="workflow-step" id="evidence-step"><b>2</b> Gather evidence</span><span class="workflow-line"></span><span class="workflow-step" id="review-step"><b>3</b> Prepare review</span></div>
+    <div class="workbench">
+      <section class="panel request-panel"><div class="panel-header"><div><h2>Purchase request</h2><p id="request-meta">Select a sample or create your own.</p></div><span class="small-tag">DRAFT</span></div>
+        <form id="request-form">
+          <label for="requester">Requester</label><select id="requester" name="requester"></select>
+          <div class="form-grid"><div><label for="product">Product or service</label><input id="product" maxlength="200" placeholder="e.g. TaskFlow Pro"></div><div><label for="vendor">Vendor</label><input id="vendor" maxlength="200" placeholder="e.g. TaskFlow"></div></div>
+          <label for="category">Category</label><input id="category" maxlength="200" placeholder="e.g. Project Management" list="categories"><datalist id="categories"><option>Project Management</option><option>Design & Creative</option><option>Developer AI</option><option>General AI</option><option>Observability</option><option>E-signature</option><option>Customer Support</option><option>Professional Services</option></datalist>
+          <div class="form-grid"><div><label for="cost">Annual cost <span>USD</span></label><div class="input-prefix"><span>$</span><input id="cost" type="number" min="0" max="1000000000" step="0.01" placeholder="Not provided"></div></div><div><label for="users">Users / licenses</label><input id="users" type="number" min="1" max="1000000" step="1" placeholder="Not provided"></div></div>
+          <label for="purpose">Business purpose</label><textarea id="purpose" rows="3" maxlength="5000" placeholder="What does your team need, and where do existing tools fall short?"></textarea>
+          <label for="data-level">Intended data access</label><select id="data-level"><option value="unknown">Not specified</option><option value="none">No data access</option><option value="public">Public data</option><option value="internal_documents">Internal documents</option><option value="internal_marketing">Internal marketing data</option><option value="source_code">Source code</option><option value="production_telemetry">Production telemetry</option><option value="cloud_account">Cloud account</option><option value="confidential_documents">Confidential documents</option><option value="employee_pii">Employee personal data</option><option value="customer_pii">Customer personal data</option><option value="credentials_secrets">Credentials / secrets</option></select>
+          <label for="integrations">Required integrations <span>one per line; leave blank for none</span></label><textarea id="integrations" rows="2" maxlength="6000" placeholder="e.g. SSO"></textarea>
+          <details class="settings"><summary>Analysis settings</summary><div class="form-grid"><div><label for="architecture">Architecture</label><select id="architecture"><option value="single">A · Single agent</option><option value="staged">B · Analyst + reviewer</option></select></div><div><label for="mode">Analysis mode</label><select id="mode"><option value="offline">Offline simulation</option><option value="live">Live AI</option></select></div></div></details>
+          <button id="analyze-button" class="primary-button" type="submit"><span>Analyze request</span><span>→</span></button>
+          <p class="form-note">No purchase is made and no budget is changed.</p>
+        </form>
+      </section>
+      <section class="result-column" aria-live="polite" aria-busy="false" id="result-column">
+        <div class="panel empty-panel" id="empty-state"><div class="empty-symbol">✓</div><div class="eyebrow">EVIDENCE BEFORE ACTION</div><h2>A clear path to review</h2><p>Run an analysis to check budget, existing software, vendor status, and approval rules.</p><div class="check-list"><span>✓ Grounded evidence</span><span>✓ Required human approvals</span><span>✓ Missing information & risk flags</span></div></div>
+        <div class="error-panel hidden" id="error-panel" role="alert"></div>
+        <div id="analysis-result" class="hidden">
+          <div class="panel decision-panel"><div class="panel-header"><div class="eyebrow">RECOMMENDED NEXT ACTION</div><span id="result-mode" class="small-tag"></span></div><h2 id="recommendation"></h2><p id="rationale"></p><div class="next-step"><div class="eyebrow">NEXT STEP</div><p id="next-step"></p></div><div class="metrics" id="metrics"></div></div>
+          <div class="panel review-panel"><h3>Required approvals <span class="pending-label">PENDING</span></h3><div class="pills" id="approvals"></div><div id="missing-section"><h3>Missing information</h3><ul id="missing-list"></ul></div><h3>Risk flags</h3><div class="pills" id="risks"></div><button class="secondary-button" id="handoff-button" type="button">Download human review handoff <span>↓</span></button><p class="form-note">Exports the request and evidence. Reviews remain pending.</p></div>
+          <div class="panel evidence-panel"><div class="panel-header"><div><h3>Evidence panel</h3><p>Facts from the tools used for this request.</p></div><span id="evidence-count" class="small-tag"></span></div><div id="evidence-list"></div></div>
+          <details class="panel trace-panel"><summary>Run details & tool trace</summary><div id="stage-details"></div><div id="tool-trace"></div><pre id="raw-result"></pre></details>
+        </div>
+      </section>
+    </div>
+    <footer>Procure · Assessment 3 <span>Recommendations are advisory. Sensitive decisions stay with humans.</span></footer>
+  </div>
+</main>
+</body>
+</html>

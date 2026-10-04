@@ -1,0 +1,6 @@
+{
+  "name": "procurement-copilot-ui-checks",
+  "private": true,
+  "scripts": {"test:ui": "node scripts/ui_smoke.cjs"},
+  "devDependencies": {"playwright-core": "1.62.1"}
+}
