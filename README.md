@@ -2,7 +2,7 @@
 
 An internal procurement workbench that gathers evidence, checks policy in code, and recommends the next human action. Built from the supplied FDE Assessment 3 starter pack, with a single-agent baseline and an analyst/reviewer variant.
 
-**The committed evaluation is an offline simulation. It makes zero model calls. Live Gemini (free tier) and OpenAI integrations are implemented and tested with simulated provider responses, but live model quality has not been measured.** All records are synthetic. The app cannot purchase software, change budgets, or approve exceptions. The assessment does not require OpenAI; the [supplied starter README](docs/STARTER_README.md#3-add-your-llm-credentials) explicitly allows any provider/framework.
+**Live Gemini evaluation is complete:** on the same 32 cases, A matched the expected next action in **21/32** runs and B in **31/32**. Both preserved all tested policy controls, evidence provenance, and human handoffs. Choose **B for a supervised pilot**, with its remaining catalog-routing error documented below. This was one live repetition; the separate offline evaluation uses three repetitions and zero model calls. All records are synthetic. The app cannot purchase software, change budgets, or approve exceptions. The assessment does not require OpenAI; the [supplied starter README](docs/STARTER_README.md#3-add-your-llm-credentials) explicitly allows any provider/framework.
 
 ![Request workbench showing a budget shortfall and required reviews](docs/screenshots/desktop.png)
 
@@ -37,7 +37,7 @@ python -m venv .venv
 ## Product workflow
 
 1. Pick one of ten sample requests or choose **New request**. Edit requester, product/vendor, annual cost, licenses, purpose, data access, and integrations.
-2. Choose architecture A or B in **Analysis settings** and run analysis.
+2. Choose architecture A or B in **Analysis settings** and run analysis. B is the UI default following the live comparison; A remains available as the baseline.
 3. Read the recommendation, source-linked evidence, required approvals, missing information, risk flags, and next step. Incomplete fields are clarified rather than invented.
 4. **Download human review handoff** exports the analyzed request, decision, original evidence, and pending reviewer roles as JSON. It does not submit an approval. Every package has `purchase_authorized: false`.
 
@@ -113,6 +113,24 @@ One repetition runs all 32 cases for each architecture (64 analyses, with multip
 
 ## Results and ship decision
 
+The [committed live Gemini results](evals/results/gemini/) contain 64 analyses and 160 real model calls using `gemini-3.5-flash-lite` on 8 October 2026. All requests completed without provider/quota failures. The comparison exits nonzero because recommendation errors were measured, not because it was interrupted; `comparison_complete` is true.
+
+| Live metric, one repetition | A: Single | B: Staged |
+| --- | ---: | ---: |
+| Expected next action / all case checks | 21/32 (65.6%) | 31/32 (96.9%) |
+| Ten original request cases: expected next action | 8/10 | 9/10 |
+| Policy checks, ledger provenance, pending human handoff | 100% each | 100% each |
+| Model completion | 32/32 | 32/32 |
+| Mean latency including six-second call spacing | 12.507 s | 17.944 s |
+| Model calls / executed tools per analysis | 2 / 5 | 3 / 5 |
+| Total input / output tokens | 178,854 / 9,618 | 281,248 / 18,011 |
+
+A incorrectly prioritized existing-tool checks for the add-on and training requests; nine additional failures repeat the training pattern in boundary/injection variants. B made one error: it routed TaskFlow for reviews instead of checking the existing catalog option first. B also has a rationale-quality limitation in I01 despite its correct next-action label. These scores are not an independent semantic-entailment measure. Nineteen of 32 cases reuse the training request, so the apparent gain is concentrated in that pattern; the ten-source-request scores give useful context. Full measurements, rationale inspection, and limitations are in [docs/EVALUATION.md](docs/EVALUATION.md).
+
+**Choose B for the supervised assessment pilot.** Its extra structured review improved the measured next-action score by ten cases at the cost of one additional model call and about 5.4 seconds more mean latency with this pacing. Keep humans responsible for every decision, address the remaining catalog-routing error, and validate on fresh requests and repeated runs before broader deployment. The [decision memo](docs/ARCHITECTURE_DECISION.md) stays below 500 words.
+
+The earlier offline simulation remains a separate regression baseline:
+
 | Offline metric | A: Single | B: Staged |
 | --- | ---: | ---: |
 | Supplied public minimum checks | 6/6 | 6/6 |
@@ -123,8 +141,6 @@ One repetition runs all 32 cases for each architecture (64 analyses, with multip
 | LLM calls / model tokens | 0 / 0 | 0 / 0 |
 
 The tiny offline timing differences do not establish a speed advantage. Recorded measurements and their conditions are in [the evaluation report](docs/EVALUATION.md) and [raw summary](evals/results/offline/summary.json). These results verify coded controls and structural evidence provenance; they do **not** establish live reasoning quality, semantic entailment, or universal prompt-injection robustness.
-
-**Choose A for a controlled pilot after live-model evaluation.** B has no observed offline quality benefit and adds a reasoning handoff plus one structured model call in live mode. Reconsider B if paired live results show enough reduction in interpretation/escalation errors to justify that cost. The [decision memo](docs/ARCHITECTURE_DECISION.md) explains the evidence and activation gate; the memo stays below 500 words.
 
 ## Engineering checks
 
@@ -144,7 +160,7 @@ Point `CHROMIUM_PATH` to your installed Chrome/Chromium executable, and set `APP
 
 ## Known limitations
 
-- Offline semantic matching/gap heuristics are limited; live model quality and account access remain unmeasured by the user's choice to continue offline.
+- Offline semantic matching/gap heuristics are limited. Live Gemini access and one paired pass are verified; OpenAI live access is unmeasured. The live sample is small, correlated, ordered A then B, and not a held-out production population.
 - Catalog seat utilization, detailed feature fit, and complete data-processing contract terms are absent. Humans must verify them; vendor capabilities do not automatically establish the requested data use.
 - The engine is tied to the supplied policy digest/reference date. Policy updates require a reviewed engine/test update rather than silently applying stale thresholds.
 - Grounding evaluation compares evidence to the tool ledger; independent semantic entailment/rationale review is still needed for live results.
@@ -158,7 +174,7 @@ Point `CHROMIUM_PATH` to your installed Chrome/Chromium executable, and set `APP
 | Implementation plan and checklist | [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) |
 | Starter inventory, provenance, defects/fixes | [docs/STARTER_INSPECTION.md](docs/STARTER_INSPECTION.md) |
 | Workflow/architecture diagrams and assumptions | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
-| Reproducible evaluation and raw results | [evals/compare.py](evals/compare.py), [evals/results/offline/](evals/results/offline/) |
+| Reproducible evaluation and raw results | [evals/compare.py](evals/compare.py), [live Gemini results](evals/results/gemini/), [offline results](evals/results/offline/) |
 | Results interpretation | [docs/EVALUATION.md](docs/EVALUATION.md) |
 | Architecture decision memo | [docs/ARCHITECTURE_DECISION.md](docs/ARCHITECTURE_DECISION.md) |
 | Demo and submission checklist | [docs/DEMO.md](docs/DEMO.md), [STUDENT_CHECKLIST.md](STUDENT_CHECKLIST.md) |

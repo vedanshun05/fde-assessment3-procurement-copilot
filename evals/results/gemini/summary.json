@@ -1,0 +1,50 @@
+{
+  "mode": "live",
+  "provider": "gemini",
+  "model": "gemini-3.5-flash-lite",
+  "comparison_complete": true,
+  "halt_reason": null,
+  "gemini_min_interval_seconds": 6.0,
+  "measured_at": "2026-10-08T08:10:52.800355+00:00",
+  "python": "3.14.7",
+  "repeat": 1,
+  "case_set_sha256": "a193a46760f205fbcdc385cd7dbae01940c2c2c46c3db322e6716a3fb114e00d",
+  "conditions": "Local HTTP mock; paired alternating architecture order; date/conflict cases override fetched responses and copied registry records; timeout is controlled.",
+  "limitations": "Prototype latency includes configured provider pacing; this is not a production-load measurement. Grounding is exact ledger provenance, not an independent semantic entailment judgment. Partial results cannot establish an architecture comparison.",
+  "architectures": {
+    "single": {
+      "runs": 32,
+      "planned_runs": 32,
+      "cases": 32,
+      "passed": 21,
+      "recommendation_correct_rate": 0.65625,
+      "policy_correct_rate": 1.0,
+      "grounded_rate": 1.0,
+      "human_handoff_correct_rate": 1.0,
+      "model_completed_rate": 1.0,
+      "mean_latency_ms": 12506.736,
+      "median_latency_ms": 12062.16,
+      "mean_llm_calls": 2,
+      "mean_tool_calls": 5,
+      "input_tokens": 178854,
+      "output_tokens": 9618
+    },
+    "staged": {
+      "runs": 32,
+      "planned_runs": 32,
+      "cases": 32,
+      "passed": 31,
+      "recommendation_correct_rate": 0.96875,
+      "policy_correct_rate": 1.0,
+      "grounded_rate": 1.0,
+      "human_handoff_correct_rate": 1.0,
+      "model_completed_rate": 1.0,
+      "mean_latency_ms": 17944.046,
+      "median_latency_ms": 18003.541,
+      "mean_llm_calls": 3,
+      "mean_tool_calls": 5,
+      "input_tokens": 281248,
+      "output_tokens": 18011
+    }
+  }
+}
