@@ -1,4 +1,4 @@
-"""An explicit offline simulator and a bounded live Responses API agent."""
+"""An explicit offline simulator and bounded provider-backed procurement agents."""
 from __future__ import annotations
 
 import json
@@ -54,6 +54,7 @@ class LiveAgent:
         self.telemetry = telemetry
         self.client = client or OpenAI(timeout=20.0, max_retries=0)
         self.model = os.getenv("OPENAI_MODEL", "gpt-4.1-mini-2025-04-14")
+        self.telemetry.provider = "openai"
         self.telemetry.model = self.model
 
     def call(self, method, stage, **kwargs):
@@ -111,6 +112,14 @@ class LiveAgent:
         # Fresh context: reviewer sees canonical sources, not the analyst's instructions/history.
         proposal = self.structured(tools, AgentProposal, "policy_risk_reviewer", extra=assessment.model_dump())
         return proposal, assessment
+
+
+def make_live_agent(telemetry, client=None):
+    from src.providers import live_configuration
+    if live_configuration().provider == "gemini":
+        from src.gemini import GeminiAgent
+        return GeminiAgent(telemetry, client)
+    return LiveAgent(telemetry, client)
 
 
 def offline_staged(tools):

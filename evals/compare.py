@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from src.data_access import get_request
 from src.solution import analyze_request
+from src.providers import live_configuration
 from src.vendor_client import get_vendor_risk
 from src.tools import DATA_DIR, csv_rows
 
@@ -90,11 +91,13 @@ def main():
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if args.repeat < 1: parser.error("--repeat must be positive")
-    if args.mode == "live" and not os.getenv("OPENAI_API_KEY"):
-        parser.error("Live evaluation requires OPENAI_API_KEY in the local .env. No offline substitution is made.")
+    config = live_configuration() if args.mode == "live" else None
+    if config is not None and not config.configured:
+        parser.error(f"Live evaluation requires {config.key_variable} in the local .env. No offline substitution is made.")
     case_file = ROOT / "evals" / "cases.json"
     cases = json.loads(case_file.read_text())
     rows, decisions = [], []
+    halted = False
     for repeat in range(args.repeat):
         for case in cases:
             for architecture in (("single", "staged") if repeat % 2 == 0 else ("staged", "single")):
@@ -109,23 +112,34 @@ def main():
                              "failures":" | ".join(checks["failures"])})
                 decisions.append({"case_id":case["case_id"], "repeat":repeat+1, "request":request, "decision":decision.model_dump()})
                 if not checks["passed"]: print("FAIL", architecture, case["case_id"], checks["failures"])
+                if args.mode == "live":
+                    print(f"{len(rows)}/{len(cases)*args.repeat*2}: {architecture} {case['case_id']} ({tel.llm_calls} model calls)", flush=True)
+                if "model_rate_limited" in decision.risk_flags:
+                    halted = True
+                    print("Provider quota reached. Stopping model calls and saving partial results; this is not a complete architecture comparison.", flush=True)
+                    break
+            if halted: break
+        if halted: break
     summaries = {}
     for architecture in ("single", "staged"):
         subset = [row for row in rows if row["architecture"]==architecture]
-        summaries[architecture] = {"runs":len(subset), "cases":len(cases), "passed":sum(row["passed"] for row in subset),
-            **{key+"_rate":sum(row[key] for row in subset)/len(subset) for key in ("recommendation_correct", "policy_correct", "grounded", "human_handoff_correct")},
-            "model_completed_rate": None if args.mode == "offline" else sum(row["model_completed"] for row in subset)/len(subset),
-            "mean_latency_ms":round(statistics.mean(row["latency_ms"] for row in subset),3),
-            "median_latency_ms":round(statistics.median(row["latency_ms"] for row in subset),3),
-            "mean_llm_calls":statistics.mean(row["llm_calls"] for row in subset),
-            "mean_tool_calls":statistics.mean(row["tool_calls"] for row in subset),
+        summaries[architecture] = {"runs":len(subset), "planned_runs":len(cases)*args.repeat,
+            "cases":len({row["case_id"] for row in subset}), "passed":sum(row["passed"] for row in subset),
+            **{key+"_rate":sum(row[key] for row in subset)/len(subset) if subset else None for key in ("recommendation_correct", "policy_correct", "grounded", "human_handoff_correct")},
+            "model_completed_rate": None if args.mode == "offline" or not subset else sum(row["model_completed"] for row in subset)/len(subset),
+            "mean_latency_ms":round(statistics.mean(row["latency_ms"] for row in subset),3) if subset else None,
+            "median_latency_ms":round(statistics.median(row["latency_ms"] for row in subset),3) if subset else None,
+            "mean_llm_calls":statistics.mean(row["llm_calls"] for row in subset) if subset else None,
+            "mean_tool_calls":statistics.mean(row["tool_calls"] for row in subset) if subset else None,
             "input_tokens":sum(row["input_tokens"] for row in subset), "output_tokens":sum(row["output_tokens"] for row in subset)}
-    summary = {"mode":args.mode, "provider":"none" if args.mode=="offline" else "OpenAI",
-        "model":None if args.mode=="offline" else os.getenv("OPENAI_MODEL","gpt-4.1-mini-2025-04-14"),
+    summary = {"mode":args.mode, "provider":config.provider if config else "none",
+        "model":config.model if config else None,
+        "comparison_complete":not halted, "halt_reason":"provider_rate_limit" if halted else None,
+        "gemini_min_interval_seconds":float(os.getenv("GEMINI_MIN_INTERVAL_SECONDS", "6")) if config and config.provider=="gemini" else None,
         "measured_at":datetime.now(timezone.utc).isoformat(), "python":sys.version.split()[0],
         "repeat":args.repeat, "case_set_sha256":hashlib.sha256(case_file.read_bytes()).hexdigest(),
         "conditions":"Local HTTP mock; paired alternating architecture order; date/conflict cases override fetched responses and copied registry records; timeout is controlled.",
-        "limitations":"Offline simulation does not measure LLM reasoning, prompt-injection robustness of a live model, or production latency. Grounding is exact ledger provenance, not an independent semantic entailment judgment.",
+        "limitations":("Offline simulation does not measure LLM reasoning, prompt-injection robustness of a live model, or production latency. " if args.mode=="offline" else "Prototype latency includes configured provider pacing; this is not a production-load measurement. ") + "Grounding is exact ledger provenance, not an independent semantic entailment judgment. Partial results cannot establish an architecture comparison.",
         "architectures":summaries}
     out = args.output or ROOT/"evals"/"results"/args.mode
     out.mkdir(parents=True,exist_ok=True)

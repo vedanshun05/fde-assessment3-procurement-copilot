@@ -2,7 +2,7 @@
 
 An internal procurement workbench that gathers evidence, checks policy in code, and recommends the next human action. Built from the supplied FDE Assessment 3 starter pack, with a single-agent baseline and an analyst/reviewer variant.
 
-**The committed evaluation is an offline simulation. It makes zero model calls. Live OpenAI integration is implemented and tested with a fake client, but live model quality has not been measured.** All records are synthetic. The app cannot purchase software, change budgets, or approve exceptions.
+**The committed evaluation is an offline simulation. It makes zero model calls. Live Gemini (free tier) and OpenAI integrations are implemented and tested with simulated provider responses, but live model quality has not been measured.** All records are synthetic. The app cannot purchase software, change budgets, or approve exceptions. The assessment does not require OpenAI; the [supplied starter README](docs/STARTER_README.md#3-add-your-llm-credentials) explicitly allows any provider/framework.
 
 ![Request workbench showing a budget shortfall and required reviews](docs/screenshots/desktop.png)
 
@@ -45,7 +45,7 @@ The form remains editable and works on mobile. Editing the request invalidates t
 
 ## Agents, tools, and controls
 
-**A:** one procurement agent gathers evidence through Responses function calls, interprets context, and returns a structured `AgentProposal`.
+**A:** one procurement agent gathers evidence through model function calls, interprets context, and returns a structured `AgentProposal`.
 
 **B:** a procurement analyst gathers the same evidence and returns an `AnalystAssessment`; a policy/risk reviewer receives it with the original evidence in a fresh context and returns an `AgentProposal`.
 
@@ -67,17 +67,21 @@ Detailed workflow/architecture diagrams, trust boundaries, policy interpretation
 
 ## Optional live AI
 
-Copy `.env.example` to `.env` and configure the key **locally**:
+**Gemini free tier:** create a key in [Google AI Studio](https://aistudio.google.com/api-keys), keep the project on its free tier, and configure it **locally** in `.env` (copy `.env.example` first if the file does not exist):
 
 ```dotenv
-OPENAI_API_KEY=your_local_key
-OPENAI_MODEL=gpt-4.1-mini-2025-04-14
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=your_local_key
+GEMINI_MODEL=gemini-3.5-flash-lite
+GEMINI_MIN_INTERVAL_SECONDS=6
 COPILOT_MODE=offline
 ```
 
 Restart the app; select **Live AI** under Analysis settings. Set `COPILOT_MODE=live` only if you want live mode as the default. Credentials stay server-side and `.env` is ignored by Git. The launcher sets the mock endpoint to its chosen `--vendor-port`; direct module/server use respects `VENDOR_RISK_BASE_URL`.
 
-The integration uses the official [Responses function-calling workflow](https://developers.openai.com/api/docs/guides/function-calling) and [structured output parsing](https://developers.openai.com/api/docs/guides/structured-outputs), with `store=False`, a 20-second per-call timeout, and SDK retries disabled. The [configured default model](https://developers.openai.com/api/docs/models/gpt-4.1-mini) supports both capabilities. Account availability and real-world quality still need validation. Live calls use the configured account and incur its normal usage charges.
+Gemini uses the official [generateContent REST API](https://ai.google.dev/api/generate-content), function declarations, and JSON-schema outputs, with a 30-second per-call timeout and no automatic retries. The default [Gemini 3.5 Flash-Lite](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite) supports function calling and structured outputs and has [free input/output pricing](https://ai.google.dev/gemini-api/docs/pricing). Account eligibility, model access, and actual [rate limits](https://ai.google.dev/gemini-api/docs/rate-limits) must be checked in AI Studio. Six-second spacing is configurable and does not guarantee sufficient daily/token quota. No Google provider SDK is needed; `httpx` is already pinned. See the [step-by-step Gemini setup](docs/GEMINI_SETUP.md).
+
+OpenAI remains an optional alternative: set `LLM_PROVIDER=openai`, `OPENAI_API_KEY`, and `OPENAI_MODEL=gpt-4.1-mini-2025-04-14`. This path uses [Responses function calling](https://developers.openai.com/api/docs/guides/function-calling) and [structured output parsing](https://developers.openai.com/api/docs/guides/structured-outputs), with `store=False`, a 20-second timeout and SDK retries disabled. It uses the account's normal API pricing. If `LLM_PROVIDER` is omitted, a configured Gemini key selects Gemini; otherwise existing OpenAI setups retain their behavior.
 
 ## Reproduce verification and evaluation
 
@@ -102,10 +106,10 @@ The [32-case set](evals/cases.json) covers all ten supplied requests; exact fina
 Run the same comparison against live AI after configuring `.env`:
 
 ```bash
-.venv/bin/python evals/compare.py --mode live --repeat 3
+.venv/bin/python evals/compare.py --mode live --repeat 1
 ```
 
-This command refuses to run without a key. It does not substitute offline scores for live results. Local live outputs are ignored until deliberately reviewed for inclusion.
+One repetition runs all 32 cases for each architecture (64 analyses, with multiple model calls per analysis). Use `--repeat 3` for a repeated comparison only when your active quota permits it. The script refuses to run without the selected provider's key, records the provider/model, and stops on HTTP 429 while saving explicitly incomplete results. A quota-interrupted run cannot establish the A/B comparison. It does not substitute offline scores for live results. Local live outputs are ignored until deliberately reviewed for inclusion.
 
 ## Results and ship decision
 
@@ -125,7 +129,7 @@ The tiny offline timing differences do not establish a speed advantage. Recorded
 ## Engineering checks
 
 - Automated tests cover policy boundaries, reference-date behavior, malformed data, source identity, evidence tampering, policy drift, model refusals/invalid schemas/citations/approval claims, bounded tool orchestration, and secret-free API configuration.
-- Fake-client tests exercise the live SDK orchestration paths without spending tokens or implying a live LLM measurement.
+- Simulated OpenAI client and Gemini HTTP tests exercise both live orchestration paths without spending tokens or implying a live LLM measurement. They also verify that quota exhaustion stops evaluation and saves incomplete results.
 - Eight headless browser checks cover custom intake, both architectures, handoff downloads, injection/missing-information display, real HTTP outage display, inert HTML-looking input, responsive layouts, and uncaught JavaScript errors.
 - GitHub Actions runs the offline verification and a tracked-file credential scan on Python 3.12.
 
@@ -144,7 +148,7 @@ Point `CHROMIUM_PATH` to your installed Chrome/Chromium executable, and set `APP
 - Catalog seat utilization, detailed feature fit, and complete data-processing contract terms are absent. Humans must verify them; vendor capabilities do not automatically establish the requested data use.
 - The engine is tied to the supplied policy digest/reference date. Policy updates require a reviewed engine/test update rather than silently applying stale thresholds.
 - Grounding evaluation compares evidence to the tool ledger; independent semantic entailment/rationale review is still needed for live results.
-- This loopback prototype has no enterprise identity, persistent approval queue, durable audit log, verified signoff, or concurrency/rate-limit controls for production. It exports an evidence package for human review.
+- This loopback prototype has no enterprise identity, persistent approval queue, durable audit log, verified signoff, or distributed rate-limit controls for production. Gemini pacing applies only within one process. It exports an evidence package for human review.
 - A missing optional LLM key supports the offline product, but an AI-backed pilot requires configuring and evaluating the live path first.
 
 ## Submission files

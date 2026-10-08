@@ -5,7 +5,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 names = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode().split("\0")
-patterns = [re.compile(rb"sk-[A-Za-z0-9_-]{20,}"), re.compile(rb"gh[pousr]_[A-Za-z0-9]{30,}"),
+patterns = [re.compile(rb"sk-[A-Za-z0-9_-]{20,}"), re.compile(rb"AIza[0-9A-Za-z_-]{35}"), re.compile(rb"gh[pousr]_[A-Za-z0-9]{30,}"),
             re.compile(rb"AKIA[0-9A-Z]{16}"), re.compile(rb"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----")]
 bad, count = [], 0
 for name in filter(None, names):

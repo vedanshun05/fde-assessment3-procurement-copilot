@@ -4,7 +4,7 @@ import time
 import re
 from src.contracts import Architecture, ProcurementDecision, PurchaseRequest, RunTelemetry
 from src.data_access import get_request
-from src.agents import LiveAgent, offline_proposal, offline_staged
+from src.agents import make_live_agent, offline_proposal, offline_staged
 from src.policy import APPROVAL_ROLES
 from src.tools import ToolSet
 
@@ -28,9 +28,9 @@ def analyze_request(request: PurchaseRequest | dict, architecture: Architecture 
     assessment = None
     try:
         if architecture == "single":
-            proposal = LiveAgent(tel, model_client).single(tools) if mode == "live" else offline_proposal(tools)
+            proposal = make_live_agent(tel, model_client).single(tools) if mode == "live" else offline_proposal(tools)
         else:
-            proposal, assessment = LiveAgent(tel, model_client).staged(tools) if mode == "live" else offline_staged(tools)
+            proposal, assessment = make_live_agent(tel, model_client).staged(tools) if mode == "live" else offline_staged(tools)
     except Exception as exc:
         if mode == "offline":
             raise
@@ -65,6 +65,8 @@ def analyze_request(request: PurchaseRequest | dict, architecture: Architecture 
     flags.extend(x[:100] for x in proposal.additional_risk_flags[:20])
     if model_error:
         flags.append("model_unavailable")
+        if model_error == "ModelRateLimitError":
+            flags.append("model_rate_limited")
         action = "manual_review"
         rationale = f"Live model assessment failed ({model_error}). Deterministic evidence and required reviews are retained; a human must complete the assessment."
     if "vendor_risk_unavailable" in flags or "tool_failure" in flags:

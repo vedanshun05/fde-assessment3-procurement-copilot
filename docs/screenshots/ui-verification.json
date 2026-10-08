@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-04T14:36:33.026Z",
+  "checked_at": "2026-10-08T07:35:25.025Z",
   "checks": [
     "workspace loads ten sample requests in offline mode",
     "existing catalog option produces a grounded license-fit handoff",

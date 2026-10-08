@@ -16,6 +16,7 @@ class RunTelemetry(BaseModel):
     tool_calls: int | None = None
     tool_names: list[str] = Field(default_factory=list)
     mode: str = "offline"
+    provider: str = "none"
     model: str | None = None
     latency_ms: float = 0
     input_tokens: int = 0

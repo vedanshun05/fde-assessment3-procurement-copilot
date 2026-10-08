@@ -21,7 +21,7 @@ The final approval step is outside this local application. A downloaded handoff 
 ```mermaid
 flowchart TD
   UI[Request UI] --> A[Procurement agent]
-  A <-->|Responses function calls| T[Five request-scoped tools]
+  A <-->|Model function calls| T[Five request-scoped tools]
   T --> B[Requester and budget CSVs]
   T --> C[Software catalog]
   T --> V[Vendor registry and purchase history]
@@ -84,4 +84,6 @@ Injection detection is diagnostic and intentionally limited. Authority does not 
 
 ## Implementation references
 
-The live integration follows official [Responses function calling](https://developers.openai.com/api/docs/guides/function-calling) and [structured output](https://developers.openai.com/api/docs/guides/structured-outputs) documentation. The default [GPT-4.1 mini](https://developers.openai.com/api/docs/models/gpt-4.1-mini) supports these capabilities; `OPENAI_MODEL` is configurable. Live account access and quality are unverified in this offline run.
+`LLM_PROVIDER` selects Gemini or OpenAI for both architectures. Gemini uses the official [generateContent REST API](https://ai.google.dev/api/generate-content), native function calls (preserving thought signatures/call IDs), and JSON-schema output validation. The default [Gemini 3.5 Flash-Lite](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite) supports both capabilities and offers a free tier; `GEMINI_MODEL` is configurable. Per-process pacing spaces model calls, including calls across both agent stages; HTTP 429 causes explicit failure without retries. An interrupted evaluation saves incomplete results and stops.
+
+OpenAI remains optional and follows official [Responses function calling](https://developers.openai.com/api/docs/guides/function-calling) and [structured output](https://developers.openai.com/api/docs/guides/structured-outputs) documentation. Its default [GPT-4.1 mini](https://developers.openai.com/api/docs/models/gpt-4.1-mini) is configurable through `OPENAI_MODEL`. Neither provider's account access or actual model quality has been measured in this offline run. The selected provider/model are recorded in telemetry and evaluation summaries.

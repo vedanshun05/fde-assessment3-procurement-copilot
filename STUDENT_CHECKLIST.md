@@ -7,7 +7,7 @@
 - [x] Human handoff export; no autonomous approvals or purchases
 - [x] Supplied data/policy and public adapter preserved
 - [x] Same 32-case evaluation for A/B; three repetitions and raw results
-- [x] 57 automated tests and eight headless UI checks passed
+- [x] 73 automated tests and eight headless UI checks passed
 - [x] Workflow/architecture diagrams, assumptions, known limitations
 - [x] Decision memo below 500 words
 - [x] README, pinned dependencies and `.env.example`
@@ -16,4 +16,4 @@
 - [x] Public GitHub repository published: https://github.com/vedanshun05/fde-assessment3-procurement-copilot
 - [ ] Submit public repository URL through the Google Form by 8 October 2026
 
-Live AI is implemented, but live model quality remains unmeasured by the user's choice to continue offline. Offline scores are explicitly labelled. Before claiming a validated AI pilot, configure a local model key and run the same live comparison; inspect rationales and source entailment.
+Live Gemini (free tier) and OpenAI integrations are implemented, but live model quality remains unmeasured while the user adds a key later. Offline scores are explicitly labelled. Follow [the Gemini setup](docs/GEMINI_SETUP.md), run the same live comparison within the project's quota, and inspect rationales/source entailment before claiming a validated AI pilot. An OpenAI key or paid provider is not required by the assessment. A quota-interrupted evaluation is explicitly incomplete.

@@ -9,4 +9,4 @@
 7. Under Analysis settings, switch to B and analyze another request. Show analyst/reviewer stages in Run details and zero LLM calls in offline mode.
 8. Show `evals/results/offline/summary.json`, the 32-case set, and the decision memo. State clearly that live model quality remains unmeasured.
 
-For live AI later, configure `.env` locally, restart the services, select Live AI, and repeat the paired evaluation. Do not present offline timing as live model latency.
+For live AI later, follow [Gemini free-tier setup](GEMINI_SETUP.md), configure `.env` locally, restart the services, select Live AI, and repeat the paired evaluation within the active quota. OpenAI is optional. Do not present offline timing as live model latency, or quota-interrupted results as a completed comparison.
