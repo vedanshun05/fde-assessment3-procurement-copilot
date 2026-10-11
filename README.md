@@ -33,6 +33,8 @@ COPILOT_MODE=live
 
 Reviewer roles remain pending. The app recommends actions and exports evidence; final approvals are handled by humans.
 
+![Procurement app showing request details, evidence, and required reviews](docs/screenshots/desktop.png)
+
 ## Architecture and tools
 
 - **A — single-agent baseline:** one procurement agent retrieves evidence and returns a structured proposal.
